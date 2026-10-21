@@ -1,32 +1,44 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MeuApp());
+  runApp(const MainApp());
 }
 
-class MeuApp extends StatefulWidget {
+class MainApp extends StatelessWidget {
+  const MainApp({super.key});
+
   @override
-  State<MeuApp> createState() => _MeuAppState();
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: TelaLocadora(),
+    );
+  }
 }
 
-class _MeuAppState extends State<MeuApp> {
-  // 1. Estado inicial com termos do negócio de lanches
-  String veiculoSelecionado = "Econômico";
-  bool seguroCompleto = false; 
-  bool gps = false;    
-  bool motoristaAdicional = false;    
-  double quantidadeDias = 1;    
+class TelaLocadora extends StatefulWidget {
+  const TelaLocadora({super.key});
 
-  // 2. Funções de alteração de estado com nomenclatura técnica
-  void mudarVeiculo(String novoVeiculo) {
+  @override
+  State<TelaLocadora> createState() => _TelaLocadoraState();
+}
+
+class _TelaLocadoraState extends State<TelaLocadora> {
+  String veiculoSelecionado = "Econômico";
+  bool seguroCompleto = false;
+  bool gps = false;
+  bool motoristaAdicional = false;
+  double quantidadeDias = 1;
+
+  void mudarVeiculo(String valor) {
     setState(() {
-      veiculoSelecionado = novoVeiculo;
+      veiculoSelecionado = valor;
     });
   }
 
   void mudarSeguro(bool valor) {
     setState(() {
-      seguroCompleto = valor; // CORRIGIDO: alterado de 'valor!' para 'novoValor'
+      seguroCompleto = valor;
     });
   }
 
@@ -46,36 +58,33 @@ class _MeuAppState extends State<MeuApp> {
     setState(() {
       quantidadeDias = valor;
     });
-  
   }
 
-  // 3. Função para calcular o preço total do pedido
   double calcularValorDiario() {
-    double valorVeiculo = 0;
+    double valor = 120;
 
-    if (veiculoSelecionado == "Econômico") {
-      valorVeiculo = 120;
-    
-   } else if (veiculoSelecionado == "SUV") {
-    valorVeiculo = 180;
-   
-   } else if (veiculoSelecionado == "Luxo") {
-    valorVeiculo = 300;
-   }
-    
+    if (veiculoSelecionado == "SUV") {
+      valor = 180;
+    } else if (veiculoSelecionado == "Luxo") {
+      valor = 300;
+    }
 
-    double valorSeguro = seguroCompleto ? 40 : 0;
-    double valorGps = gps ? 15 : 0;
+    if (seguroCompleto == true) {
+      valor = valor + 40;
+    }
 
-    // Fórmula: (Lanche + Queijo) * Quantidade + Entrega
-    return (valorVeiculo + valorSeguro + valorGps);
+    if (gps == true) {
+      valor = valor + 15;
+    }
+
+    return valor;
   }
 
   double calcularValorBruto() {
     double valor = calcularValorDiario() * quantidadeDias;
 
-    if(motoristaAdicional){
-      valor += 100;
+    if (motoristaAdicional == true) {
+      valor = valor + 100;
     }
 
     return valor;
@@ -84,11 +93,10 @@ class _MeuAppState extends State<MeuApp> {
   double calcularDesconto() {
     double desconto = 0;
 
-    if (quantidadeDias >= 15){
+    if (quantidadeDias >= 15) {
       desconto = 0.10;
-    } else if (quantidadeDias >= 7){
+    } else if (quantidadeDias >= 7) {
       desconto = 0.05;
-
     }
 
     return calcularValorBruto() * desconto;
@@ -99,10 +107,10 @@ class _MeuAppState extends State<MeuApp> {
   }
 
   String mostrarDinheiro(double valor) {
-    return "R\${valor.toStringAsFixed(2).replaceAll('.', ',')}";
+    return "R\$ ${valor.toStringAsFixed(2).replaceAll('.', ',')}";
   }
-  
-  String mostrarDescontoPercentual(){
+
+  String mostrarDescontoPercentual() {
     if (quantidadeDias >= 15) {
       return "10%";
     } else if (quantidadeDias >= 7) {
@@ -113,27 +121,30 @@ class _MeuAppState extends State<MeuApp> {
   }
 
   void finalizarReserva() {
-     showDialog(
+    showDialog(
       context: context,
       builder: (contextoDialogo) {
         return AlertDialog(
-          title: const Text("Resumo da Locação"),
+          title: const Text("Resumo da Reserva"),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text("Veículo: $veiculoSelecionado"),
-                Text("Quantidade de dias: ${quantidadeDias.toInt()}"),
+                Text("Dias: ${quantidadeDias.toInt()}"),
                 Text("Seguro completo: ${seguroCompleto ? 'Sim' : 'Não'}"),
                 Text("GPS: ${gps ? 'Sim' : 'Não'}"),
                 Text(
-                  "Motorista adicional: ${motoristaAdicional ? 'Sim' : 'Não'}",
+                  "Motorista adicional: "
+                  "${motoristaAdicional ? 'Sim' : 'Não'}",
                 ),
                 const Divider(),
                 Text("Valor bruto: ${mostrarDinheiro(calcularValorBruto())}"),
-                Text("Desconto (${mostrarDescontoPercentual()}): "
-                    "${mostrarDinheiro(calcularDesconto())}"),
+                Text(
+                  "Desconto (${mostrarDescontoPercentual()}): "
+                  "${mostrarDinheiro(calcularDesconto())}",
+                ),
                 const SizedBox(height: 8),
                 Text(
                   "Valor final: ${mostrarDinheiro(calcularValorFinal())}",
@@ -172,227 +183,186 @@ class _MeuAppState extends State<MeuApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        backgroundColor: const Color(0xFFF5F5F5),
-        appBar: AppBar(
-          title: const Text("Locadora de Carros"),
-          backgroundColor: Colors.deepPurple,
-          foregroundColor: Colors.white,
-          centerTitle: true,
-        ),
-        body: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Card(
-              color: const Color(0xFFFBF7FF),
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text("Locadora de Carros"),
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Center(
+                child: Text(
+                  "Monte sua Locação",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple,
+                  ),
+                ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Center(
-                      child: Text(
-                        "Monte sua Locação",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple,
-                        ),
+
+              const SizedBox(height: 20),
+
+              const Text("Escolha o veículo"),
+
+              const SizedBox(height: 8),
+
+              SizedBox(
+                width: double.infinity,
+                child: SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(
+                      value: "Econômico",
+                      label: Text(
+                        "Econômico\nR\$ 120",
+                        textAlign: TextAlign.center,
                       ),
                     ),
-
-                    const SizedBox(height: 24),
-
-                    const Text(
-                      "Escolha o veículo",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    SizedBox(
-                      width: double.infinity,
-                      child: SegmentedButton<String>(
-                        style: SegmentedButton.styleFrom(
-                          selectedBackgroundColor: const Color(0xFFE1BEE7),
-                          selectedForegroundColor: Colors.black,
-                        ),
-                        segments: const [
-                          ButtonSegment(
-                            value: "Econômico",
-                            label: Text(
-                              "Econômico\nR\$ 120",
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          ButtonSegment(
-                            value: "SUV",
-                            label: Text(
-                              "SUV\nR\$ 180",
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          ButtonSegment(
-                            value: "Luxo",
-                            label: Text(
-                              "Luxo\nR\$ 300",
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                        selected: {veiculoSelecionado},
-                        onSelectionChanged: (novaSelecao) {
-                          mudarVeiculo(novaSelecao.first);
-                        },
+                    ButtonSegment(
+                      value: "SUV",
+                      label: Text(
+                        "SUV\nR\$ 180",
+                        textAlign: TextAlign.center,
                       ),
                     ),
-
-                    const SizedBox(height: 20),
-
-                    const Text(
-                      "Opcionais",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    CheckboxListTile(
-                      contentPadding: EdgeInsets.zero,
-                      activeColor: Colors.deepPurple,
-                      title: const Text("Seguro completo (+ R\$ 40/dia)"),
-                      value: seguroCompleto,
-                      onChanged: (valor) {
-                        mudarSeguro(valor ?? false);
-                      },
-                    ),
-
-                    CheckboxListTile(
-                      contentPadding: EdgeInsets.zero,
-                      activeColor: Colors.deepPurple,
-                      title: const Text("GPS (+ R\$ 15/dia)"),
-                      value: gps,
-                      onChanged: (valor) {
-                        mudarGps(valor ?? false);
-                      },
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    const Text(
-                      "Motorista adicional (+ R\$ 100 fixos)",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-
-                    Switch(
-                      activeColor: Colors.deepPurple,
-                      value: motoristaAdicional,
-                      onChanged: (valor) {
-                        mudarMotorista(valor);
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    Text(
-                      "Quantidade de dias: ${quantidadeDias.toInt()}",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-
-                    Slider(
-                      min: 1,
-                      max: 30,
-                      divisions: 29,
-                      activeColor: Colors.deepPurple,
-                      inactiveColor: Colors.grey,
-                      value: quantidadeDias,
-                      onChanged: (valor) {
-                        mudarDias(valor);
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    const Divider(),
-
-                    const Text(
-                      "Resumo da Locação",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple,
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    Text("Veículo: $veiculoSelecionado"),
-                    Text("Dias: ${quantidadeDias.toInt()}"),
-                    Text("Seguro: ${seguroCompleto ? 'Sim' : 'Não'}"),
-                    Text("GPS: ${gps ? 'Sim' : 'Não'}"),
-                    Text(
-                      "Motorista adicional: "
-                      "${motoristaAdicional ? 'Sim' : 'Não'}",
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    Text(
-                      "Valor bruto: ${mostrarDinheiro(calcularValorBruto())}",
-                    ),
-
-                    Text(
-                      "Desconto (${mostrarDescontoPercentual()}): "
-                      "${mostrarDinheiro(calcularDesconto())}",
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    Text(
-                      "Valor final: ${mostrarDinheiro(calcularValorFinal())}",
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple,
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: finalizarReserva,
-                        child: const Text(
-                          "Finalizar Reserva",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                    ButtonSegment(
+                      value: "Luxo",
+                      label: Text(
+                        "Luxo\nR\$ 300",
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ],
+                  selected: {veiculoSelecionado},
+                  onSelectionChanged: (novaSelecao) {
+                    mudarVeiculo(novaSelecao.first);
+                  },
                 ),
               ),
-            ),
+
+              const SizedBox(height: 16),
+
+              const Text(
+                "Opcionais",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                activeColor: Colors.deepPurple,
+                title: const Text("Seguro completo (+ R\$ 40/dia)"),
+                value: seguroCompleto,
+                onChanged: (valor) {
+                  mudarSeguro(valor ?? false);
+                },
+              ),
+
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                activeColor: Colors.deepPurple,
+                title: const Text("GPS (+ R\$ 15/dia)"),
+                value: gps,
+                onChanged: (valor) {
+                  mudarGps(valor ?? false);
+                },
+              ),
+
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text("Motorista adicional (+ R\$ 100 fixos)"),
+                  ),
+                  Switch(
+                    activeColor: Colors.deepPurple,
+                    value: motoristaAdicional,
+                    onChanged: (valor) {
+                      mudarMotorista(valor);
+                    },
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 10),
+
+              Text("Quantidade de dias: ${quantidadeDias.toInt()}"),
+
+              Slider(
+                min: 1,
+                max: 30,
+                divisions: 29,
+                activeColor: Colors.deepPurple,
+                value: quantidadeDias,
+                onChanged: (valor) {
+                  mudarDias(valor);
+                },
+              ),
+
+              const Divider(),
+
+              const Text(
+                "Resumo da Locação",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              Text("Veículo: $veiculoSelecionado"),
+              Text("Dias: ${quantidadeDias.toInt()}"),
+              Text("Seguro: ${seguroCompleto ? 'Sim' : 'Não'}"),
+              Text("GPS: ${gps ? 'Sim' : 'Não'}"),
+              Text(
+                "Motorista adicional: "
+                "${motoristaAdicional ? 'Sim' : 'Não'}",
+              ),
+
+              const SizedBox(height: 10),
+
+              Text("Valor bruto: ${mostrarDinheiro(calcularValorBruto())}"),
+              Text(
+                "Desconto (${mostrarDescontoPercentual()}): "
+                "${mostrarDinheiro(calcularDesconto())}",
+              ),
+
+              const SizedBox(height: 8),
+
+              Text(
+                "Valor final: ${mostrarDinheiro(calcularValorFinal())}",
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: finalizarReserva,
+                  child: const Text("Finalizar Reserva"),
+                ),
+              ),
+            ],
           ),
         ),
       ),
