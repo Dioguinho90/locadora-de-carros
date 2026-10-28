@@ -163,7 +163,7 @@ class _TelaLocadoraState extends State<TelaLocadora> {
               },
               child: const Text("Cancelar"),
             ),
-            ElevatedButton(
+            TextButton(
               onPressed: () {
                 Navigator.pop(contextoDialogo);
 
@@ -173,7 +173,7 @@ class _TelaLocadoraState extends State<TelaLocadora> {
                   ),
                 );
               },
-              child: const Text("Confirmar Reserva"),
+              child: const Text("Confirmar"),
             ),
           ],
         );
