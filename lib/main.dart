@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   runApp(const MainApp());
+  
 }
 
 class MainApp extends StatelessWidget {
@@ -310,7 +311,7 @@ class _TelaLocadoraState extends State<TelaLocadora> {
               const Divider(),
 
               const Text(
-                "Resumo da Locação",
+                "Tudo o que você alugou da Locação",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
